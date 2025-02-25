@@ -1,4 +1,4 @@
-# The data preparation experience
+# The TableVectorizer
 ####################################
 # %%
 # Load the data and split out the column to predict
@@ -39,10 +39,14 @@ model
 
 # %%
 # And if we want, we can use LLMs to embed the high cardinality strings
+# Only 2 cores, to avoid blowing up the memory
 from skrub import TextEncoder
 model['tablevectorizer'].high_cardinality = TextEncoder()
 results[model] = cross_validate(model, df, y, scoring='r2', n_jobs=-2)
 print(f"R2 score {np.mean(results[model]['test_score']):.2f} in {np.mean(results[model]['fit_time']):.2f} seconds")
 model
 
+# Beyond the string encoders, we also have the DatetimeEncoder
+
 # %%
+
