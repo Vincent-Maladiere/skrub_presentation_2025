@@ -22,7 +22,7 @@
 ## Python toolchain
 
 - scikit-learn: 3M downloads a day
-- pandas: 10 downloads a day
+- pandas: 10M downloads a day
 
 
 ## Machine learning 101
