@@ -104,6 +104,10 @@ y_pred = predictor.predict({
     'products': data_test.products,
 })
 
+# And we can evaluate the predictions
+from sklearn.metrics import classification_report
+print(classification_report(y_test, y_pred))
+
 
 # %%
 # Now, let's optimize a bit our vectorization of the products.
