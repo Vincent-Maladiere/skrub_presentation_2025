@@ -66,8 +66,9 @@ products = skrub.var("products", dataset.products)
 products
 # %%
 # Now we define our "x" and "y" variables
-baskets = skrub.var("baskets", dataset.baskets[["ID"]]).skb.mark_as_x()
-fraud_flags = skrub.var("fraud", dataset.baskets["fraud_flag"]).skb.mark_as_y()
+baskets = skrub.var('baskets', dataset.baskets)
+basket_IDs = baskets[["ID"]].skb.mark_as_x()
+fraud_flags = baskets["fraud_flag"].skb.mark_as_y()
 
 # %%
 # We can now proceed almost as above to prepare the data
@@ -81,12 +82,12 @@ aggregated_products = vectorized_products.groupby("basket_ID").agg("mean").reset
 aggregated_products
 # %%
 # And we join the tables
-baskets = baskets.merge(aggregated_products, left_on="ID", right_on="basket_ID")
-baskets = baskets.drop(columns=["ID", "basket_ID"])
-baskets
+features = basket_IDs.merge(aggregated_products, left_on="ID", right_on="basket_ID")
+features = features.drop(columns=["ID", "basket_ID"])
+features
 # %%
 # And we do the prediction
-predictions = baskets.skb.apply(ExtraTreesClassifier(n_jobs=-1), y=fraud_flags)
+predictions = features.skb.apply(ExtraTreesClassifier(n_jobs=-1), y=fraud_flags)
 predictions
 
 # %%
@@ -94,8 +95,12 @@ predictions
 # Or apply to new data
 
 data_test = fetch_credit_fraud(split="test")
-fraud_test = predictions.skb.eval({
-    'baskets': data_test.baskets,
+y_test = data_test.baskets['fraud_flag']
+basket_test = data_test.baskets.drop('fraud_flag', axis=1)
+
+predictor = predictions.skb.get_estimator(fitted=True)
+y_pred = predictor.predict({
+    'baskets': basket_test,
     'products': data_test.products,
 })
 
@@ -114,10 +119,12 @@ vectorized_products = products.skb.apply(vectorizer, cols=s.all() - "basket_ID")
 aggregated_products = vectorized_products.groupby("basket_ID").agg("mean").reset_index()
 
 # We redefine our sources, to have a clean start
-baskets = skrub.var("baskets", dataset.baskets[["ID"]]).skb.mark_as_x()
-baskets = baskets.merge(aggregated_products, left_on="ID", right_on="basket_ID")
-baskets = baskets.drop(columns=["ID", "basket_ID"])
-predictions = baskets.skb.apply(ExtraTreesClassifier(n_jobs=-1), y=fraud_flags)
+baskets = skrub.var('baskets', dataset.baskets)
+basket_IDs = baskets[["ID"]].skb.mark_as_x()
+fraud_flags = baskets["fraud_flag"].skb.mark_as_y()
+features = baskets_IDs.merge(aggregated_products, left_on="ID", right_on="basket_ID")
+features = features.drop(columns=["ID", "basket_ID"])
+predictions = features.skb.apply(ExtraTreesClassifier(n_jobs=-1), y=fraud_flags)
 
 search = predictions.skb.get_grid_search(fitted=True, scoring="roc_auc",
                                          verbose=2)
@@ -128,3 +135,5 @@ search.get_cv_results_table()
 # For instance, we can visualize the hyperparameters selection
 search.plot_parallel_coord()
 
+
+# %%
