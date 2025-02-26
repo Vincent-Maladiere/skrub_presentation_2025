@@ -91,13 +91,15 @@ predictions = features.skb.apply(ExtraTreesClassifier(n_jobs=-1), y=fraud_flags)
 predictions
 
 # %%
-# What's the big deal? We now have a graph of computations, that we can optimize
-# Or apply to new data
+# What's the big deal? We now have a graph of computations
+# We can apply it to new data
 
+# We load the test data
 data_test = fetch_credit_fraud(split="test")
 y_test = data_test.baskets['fraud_flag']
 basket_test = data_test.baskets.drop('fraud_flag', axis=1)
 
+# We can apply a predictor to this new data
 predictor = predictions.skb.get_estimator(fitted=True)
 y_pred = predictor.predict({
     'baskets': basket_test,
@@ -107,6 +109,7 @@ y_pred = predictor.predict({
 # And we can evaluate the predictions
 from sklearn.metrics import classification_report
 print(classification_report(y_test, y_pred))
+
 
 
 # %%
@@ -126,7 +129,7 @@ aggregated_products = vectorized_products.groupby("basket_ID").agg("mean").reset
 baskets = skrub.var('baskets', dataset.baskets)
 basket_IDs = baskets[["ID"]].skb.mark_as_x()
 fraud_flags = baskets["fraud_flag"].skb.mark_as_y()
-features = baskets_IDs.merge(aggregated_products, left_on="ID", right_on="basket_ID")
+features = basket_IDs.merge(aggregated_products, left_on="ID", right_on="basket_ID")
 features = features.drop(columns=["ID", "basket_ID"])
 predictions = features.skb.apply(ExtraTreesClassifier(n_jobs=-1), y=fraud_flags)
 
@@ -139,5 +142,7 @@ search.get_cv_results_table()
 # For instance, we can visualize the hyperparameters selection
 search.plot_parallel_coord()
 
-
+# %%
+# We can also get a full report of the pipeline
+predictions.skb.full_report()
 # %%

@@ -1,5 +1,7 @@
 # srkub for tables: Less wrangling, more machine learning
 
+         This presentation: https://github.com/GaelVaroquaux/skrub_presentation_2025
+
 ## Machine learning: making the best of data
 
 - We live in a data-intensive era
