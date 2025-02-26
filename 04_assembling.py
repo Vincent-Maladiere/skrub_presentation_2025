@@ -110,6 +110,6 @@ baskets = baskets.drop(columns=["ID", "basket_ID"])
 predictions = baskets.skb.apply(ExtraTreesClassifier(n_jobs=-1), y=fraud_flags)
 
 search = predictions.skb.get_grid_search(fitted=True, scoring="roc_auc",
-                                         verbose=True)
+                                         verbose=2)
 search.get_cv_results_table()
 # %%
