@@ -93,13 +93,23 @@ predictions
 # What's the big deal? We now have a graph of computations, that we can optimize
 # Or apply to new data
 
-# For instance, let's optimize a bit our vectorization of the products.
+data_test = fetch_credit_fraud(split="test")
+fraud_test = predictions.skb.eval({
+    'baskets': data_test.baskets,
+    'products': data_test.products,
+})
+
+
+# %%
+# Now, let's optimize a bit our vectorization of the products.
 # We just need to change a bit the above code
 encoder = skrub.StringEncoder(
     vectorizer=skrub.choose_from(["tfidf", "hashing"], name="vectorizer"),
 )
 vectorizer = skrub.TableVectorizer(high_cardinality=encoder,
                                    n_jobs=2)
+
+# The rest of the code remains the same
 vectorized_products = products.skb.apply(vectorizer, cols=s.all() - "basket_ID")
 aggregated_products = vectorized_products.groupby("basket_ID").agg("mean").reset_index()
 
@@ -112,4 +122,9 @@ predictions = baskets.skb.apply(ExtraTreesClassifier(n_jobs=-1), y=fraud_flags)
 search = predictions.skb.get_grid_search(fitted=True, scoring="roc_auc",
                                          verbose=2)
 search.get_cv_results_table()
+
 # %%
+# skrub gives you all kinds of tools to tune and inspect this pipeline:
+# For instance, we can visualize the hyperparameters selection
+search.plot_parallel_coord()
+
