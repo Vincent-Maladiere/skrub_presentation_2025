@@ -110,7 +110,7 @@ print(classification_report(y_test, y_pred))
 
 
 # %%
-# Now, let's optimize a bit our vectorization of the products.
+# We can also tune hyperparameters of our data preparation
 # We just need to change a bit the above code
 encoder = skrub.StringEncoder(
     vectorizer=skrub.choose_from(["tfidf", "hashing"], name="vectorizer"),
